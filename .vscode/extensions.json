@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "antfu.vite",
+    "gruntfuggly.todo-tree",
+    "bradlc.vscode-tailwindcss",
+    "yoavbls.pretty-ts-errors",
+    "esbenp.prettier-vscode",
+    "pkief.material-icon-theme",
+    "ms-vsliveshare.vsliveshare",
+    "ionic.ionic",
+    "eamodio.gitlens",
+    "dbaeumer.vscode-eslint"
+  ]
+}
