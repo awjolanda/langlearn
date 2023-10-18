@@ -1,16 +1,45 @@
 const express = require("express");
+const mysql = require("mysql");
 const app = express();
 const cors = require("cors");
 const port = 3001;
 
 app.use(cors());
+app.use(express.json());
 
-app.get("/api/home", (req, res) => {
-  res.json({message: "Test!",  courses: ["Englisch", "ᚢᚱᚷᛖᚱᛗᚨᚾᛁᛊᚲ", "Latinisch", "PWGmc"]})
+//Datenbankverbindung
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'langlearn_access',
+  password: 'sml12345',
+  database: 'langlearndb'
+})
+
+//Fehlerbehandlung
+db.connect((err) => {
+  if (err) throw err;
+  console.log('Die Verbindung zur Datenbank wurde erfolgreich hergestellt.')
 });
 
-// Middleware, um JSON zu parsen
-app.use(express.json());
+//Methode zum Anzeigen aller Kürse.
+app.get('/courses', (req, res) => {
+  let sql = 'SELECT name FROM courses';
+  db.query(sql, (err, results) => {
+    if(err) throw err;
+    res.send(results);
+  });
+});
+
+//Methode zum Erstellen eines Kurses.
+app.post('/courses', (req, res) => {
+  let data = req.body;
+  let sql = 'INSERT INTO courses SET ?';
+
+  db.query(sql, data, (err, result) => {
+    if (err) throw err;
+    res.send('Daten erfolgreich hinzugefügt.')
+  });
+});
 
 // GET-Anfrage
 app.get('/', (req, res) => {
