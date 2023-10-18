@@ -16,42 +16,38 @@ import { useEffect, useState } from 'react'
 
 const Home: React.FC = () => {
 
-    const [message, setMessage] = useState("wird geladen...");
     const [courses, setCourses] = useState(["wird geladen..."]);
   
     useEffect(() => {
-      fetch("http://localhost:3001/api/home").then(
-        response => response.json()
-      ).then(
-        data => {
-          setMessage(data.message)
-          setCourses(data.courses)
+      fetch("http://localhost:3001/api/courses")
+      .then(response => response.json())
+      .then(data => {
+          setCourses(data)
         }
-      )
-    }, [])
+      );
+    }, []);
 
-  return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Blank</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent fullscreen>
-        <ExploreContainer />
-        {courses.map((courses, index) => (
-          <IonCard key={index}>
-            <IonCardHeader>
-              <IonCardTitle>{courses}</IonCardTitle>
-              <IonCardSubtitle></IonCardSubtitle>
-            </IonCardHeader>
-            <IonCardContent></IonCardContent>
-          </IonCard>
-        ))}
-        <div>{message}</div>
-      </IonContent>
-    </IonPage>
-  );
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>langlearn</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent fullscreen>
+          <ExploreContainer />
+          {courses.map((course, index) => (
+            <IonCard key={index}>
+              <IonCardHeader>
+                <IonCardTitle>{course.name}</IonCardTitle>
+                <IonCardSubtitle>{course.description}</IonCardSubtitle>
+              </IonCardHeader>
+              <IonCardContent></IonCardContent>
+            </IonCard>
+          ))}
+        </IonContent>
+      </IonPage>
+    );
 };
 
 export default Home;
