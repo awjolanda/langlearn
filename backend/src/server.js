@@ -22,8 +22,8 @@ db.connect((err) => {
 });
 
 //Methode zum Anzeigen aller Kürse.
-app.get('/courses', (req, res) => {
-  let sql = 'SELECT name FROM courses';
+app.get('/api/courses', (req, res) => {
+  let sql = 'SELECT * FROM courses';
   db.query(sql, (err, results) => {
     if(err) throw err;
     res.send(results);
@@ -31,26 +31,17 @@ app.get('/courses', (req, res) => {
 });
 
 //Methode zum Erstellen eines Kurses.
-app.post('/courses', (req, res) => {
+app.post('/api/courses', (req, res) => {
   let data = req.body;
   let sql = 'INSERT INTO courses SET ?';
 
   db.query(sql, data, (err, result) => {
     if (err) throw err;
-    res.send('Daten erfolgreich hinzugefügt.')
+    res.send('Die Daten wurden erfolgreich hinzugefügt.')
   });
 });
 
-// GET-Anfrage
-app.get('/', (req, res) => {
-  res.send('GET-Anfrage erhalten!');
-});
-
-// POST-Anfrage
-app.post('/', (req, res) => {
-  console.log(req.body); // Deine gesendeten Daten
-  res.send('POST-Anfrage erhalten!');
-});
+//ZU TUN: PUT-Methode zum Aktulisieren von Datensätzen in der Datenbank. DELETE-Methode zum Löschen von Datensätzen in der Datenbank.
 
 // PUT-Anfrage
 app.put('/', (req, res) => {
@@ -63,6 +54,7 @@ app.delete('/', (req, res) => {
   res.send('DELETE-Anfrage erhalten!');
 });
 
+//Methode um den Port des Servers freizugeben.
 app.listen(port, () => {
   console.log(`Server läuft auf http://localhost:${port}`);
 });
