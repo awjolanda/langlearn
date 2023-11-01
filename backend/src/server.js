@@ -36,9 +36,9 @@ app.get("/api/courses/:id", (req, res) => {
   db.query(sql, [req.params.id], (err, results) => {
     if (err) {
       console.err(err);
-      res.status(404).send("Der Angefordete Kurs wurde leider nicht gefunden.");
+      res.status(500).send("Es gab ein Problem beim Bearbeiten Ihrer Abfrage.");
     } else {
-      res.status(200);
+      res.status(201).send("Der Kurs wurde erfolgerich erstellt.");
     };
     res.send(results);
   });
@@ -54,8 +54,8 @@ app.post("/api/courses", (req, res) => {
       console.err(err);
       res.status(500).send("Es gab ein Problem beim Bearbeiten Ihrer Abfrage.");
     } else {
-      res.status(201).send("Der Kurs wurde erfolgerich erstellt.");
-    };    res.send("Die Daten wurden erfolgreich hinzugefügt.");
+      res.status(201).send("Die Daten wurden erfolgreich hinzugefügt.");
+    };
   });
 });
 
