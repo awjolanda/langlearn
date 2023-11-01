@@ -26,19 +26,19 @@ const Home: React.FC = () => {
   }, []);
 
   const deleteCourse = (id: string) => {
-    fetch (`http://localhost:3001/api/courses/${id}`, {
-      method: 'DELETE',
+    fetch(`http://localhost:3001/api/courses/${id}`, {
+      method: "DELETE",
     })
-    .then(response => response.text())
-    .then(data => {
-      console.log(data);
-      return fetch('http://localhost:3001/api/courses');
-    })
-    .then(response => response.json())
-    .then(data => setCourses(data))
-    .catch((error) => {
-      console.error('Fehler:', error);
-    });
+      .then((response) => response.text())
+      .then((data) => {
+        console.log(data);
+        return fetch("http://localhost:3001/api/courses");
+      })
+      .then((response) => response.json())
+      .then((data) => setCourses(data))
+      .catch((error) => {
+        console.error("Fehler:", error);
+      });
   };
 
   return (
@@ -53,7 +53,9 @@ const Home: React.FC = () => {
         {courses.map((course, index) => (
           <IonCard key={index}>
             <IonCardHeader>
-              <IonCardTitle>({course.ID}) {course.name}</IonCardTitle>
+              <IonCardTitle>
+                ({course.ID}) {course.name}
+              </IonCardTitle>
               <IonCardSubtitle>{course.description}</IonCardSubtitle>
               <button onClick={() => deleteCourse(course.ID)}>Löschen</button>
             </IonCardHeader>

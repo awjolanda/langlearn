@@ -9,58 +9,62 @@ app.use(express.json());
 
 // Datenbankverbindung
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'langlearn_access',
-  password: 'sml12345',
-  database: 'langlearndb'
+  host: "localhost",
+  user: "langlearn_access",
+  password: "sml12345",
+  database: "langlearndb",
 });
 
 // Fehlerbehandlung
 db.connect((err) => {
   if (err) throw err;
-  console.log('Die Verbindung zur Datenbank wurde erfolgreich hergestellt.');
+  console.log("Die Verbindung zur Datenbank wurde erfolgreich hergestellt.");
 });
 
 // Methode zum Anzeigen aller Kürse.
-app.get('/api/courses', (req, res) => {
-  let sql = 'SELECT * FROM courses';
+app.get("/api/courses", (req, res) => {
+  let sql = "SELECT * FROM courses";
   db.query(sql, (err, results) => {
-    if(err) throw err;
+    if (err) throw err;
     res.send(results);
   });
 });
 
 // Methode zum Erstellen eines Kurses.
-app.post('/api/courses', (req, res) => {
+app.post("/api/courses", (req, res) => {
   let data = req.body;
-  let sql = 'INSERT INTO courses SET ?';
+  let sql = "INSERT INTO courses SET ?";
 
   db.query(sql, data, (err, result) => {
     if (err) throw err;
-    res.send('Die Daten wurden erfolgreich hinzugefügt.');
+    res.send("Die Daten wurden erfolgreich hinzugefügt.");
   });
 });
 
 // ZU TUN: PUT-Methode zum Aktulisieren von Datensätzen in der Datenbank. DELETE-Methode zum Löschen von Datensätzen in der Datenbank.
 
 // PUT-Anfrage
-app.put('/api/courses/:id', (req, res) => {
+app.put("/api/courses/:id", (req, res) => {
   let data = req.body;
-  let sql = 'UPDATE courses SET ? WHERE id = ?';
+  let sql = "UPDATE courses SET ? WHERE id = ?";
 
   db.query(sql, [data, req.params.id], (err, result) => {
     if (err) throw err;
-    res.send(`Der Kurs mit der ID ${req.params.id} wurde erflogreich aktualisiert.`);
+    res.send(
+      `Der Kurs mit der ID ${req.params.id} wurde erflogreich aktualisiert.`
+    );
   });
 });
 
 // DELETE-Anfrage
-app.delete('/api/courses/:id', (req, res) => {
-  let sql = 'DELETE FROM courses WHERE id = ?';
+app.delete("/api/courses/:id", (req, res) => {
+  let sql = "DELETE FROM courses WHERE id = ?";
 
   db.query(sql, [req.params.id], (err, result) => {
     if (err) throw err;
-    res.send(`Der Kurs mit der ID ${req.params.id} wurde erfolgreich gelöscht!`);
+    res.send(
+      `Der Kurs mit der ID ${req.params.id} wurde erfolgreich gelöscht!`
+    );
   });
 });
 
