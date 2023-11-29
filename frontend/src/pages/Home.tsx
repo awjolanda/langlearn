@@ -10,86 +10,101 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import ExploreContainer from "../components/ExploreContainer";
 import "./Home.css";
 import { useEffect, useRef, useState } from "react";
+import { BaseCourse, Course } from "@/types/general";
+import { createCourse, deleteCourse, updateCourse } from "@/lib/api";
+import {
+  areStringsNullOrEmpty,
+  isStringNullOrEmpty,
+  updateArrayWithElement,
+} from "@/lib/utils";
 
 const Home: React.FC = () => {
-  const [courses, setCourses] = useState(["wird geladen..."]);
+  const [courses, setCourses] = useState([] as Course[]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:3001/api/courses")
       .then((response) => response.json())
       .then((data) => {
-        setCourses(data);
+        setCourses(data as Course[]);
       });
   }, []);
 
-  const createNameRef = useRef();
-  const createDescriptionRef = useRef();
-  const updateNameRef = useRef();
-  const updateDescriptionRef = useRef();
+  const createNameRef = useRef<HTMLInputElement>(null);
+  const createDescriptionRef = useRef<HTMLInputElement>(null);
 
-  const createCourse = () => {
-    const name = createNameRef.current.value;
-    const description = createDescriptionRef.current.value;
+  const create = async () => {
+    const name = createNameRef.current?.value;
+    const description = createDescriptionRef.current?.value;
 
-    fetch("http://localhost:3001/api/courses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, description }),
-    })
-      .then((response) => response.text())
-      .then((data) => {
-        console.log(data);
-        return fetch("http://localhost:3001/api/courses");
-      })
-      .then((response) => response.json())
-      .then((data) => setCourses(data))
-      .catch((error) => {
-        console.error("Fehler:", error);
-      });
+    if (isStringNullOrEmpty(name)) {
+      alert("Field 'Kursname' must not be empty!");
+      return;
+    }
+
+    const course = { name, description } as BaseCourse;
+
+    setIsLoading(true);
+
+    try {
+      const response = (await createCourse(course)) as Course;
+      setCourses([...courses, response]);
+    } catch (error) {
+      console.error("Failed to create: ", error);
+      alert("Failed to create!");
+    }
+
+    setTimeout(() => setIsLoading(false), 1000);
   };
 
-  const updateCourse = (id: string) => {
-    const name = updateNameRef.current.value;
-    const description = updateDescriptionRef.current.value;
+  const update = async (id: Number) => {
+    const nameElement = document.getElementById(
+      `edited-course-name-${id}`
+    ) as HTMLInputElement;
+    const descriptionElement = document.getElementById(
+      `edited-course-description-${id}`
+    ) as HTMLInputElement;
 
-    fetch(`http://localhost:3001/api/courses/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, description }),
-    })
-      .then((response) => response.text())
-      .then((data) => {
-        console.log(data);
-        return fetch("http://localhost:3001/api/courses");
-      })
-      .then((response) => response.json())
-      .then((data) => setCourses(data))
-      .catch((error) => {
-        console.error("Fehler:", error);
-      });
+    const name = nameElement.value;
+    const description = descriptionElement.value;
+
+    if (isStringNullOrEmpty(name)) {
+      alert("Field 'Kursname' must not be empty!");
+      return;
+    }
+
+    const course = { name, description } as BaseCourse;
+    setIsLoading(true);
+
+    try {
+      const response = (await updateCourse(id, course)) as Course;
+      setCourses(updateArrayWithElement(response, courses));
+      nameElement.value = "";
+      descriptionElement.value = "";
+    } catch (error) {
+      console.error("Failed to create: ", error);
+      alert("Failed to create!");
+    }
+
+    setTimeout(() => setIsLoading(false), 1000);
   };
 
-  const deleteCourse = (id: string) => {
-    fetch(`http://localhost:3001/api/courses/${id}`, {
-      method: "DELETE",
-    })
-      .then((response) => response.text())
-      .then((data) => {
-        console.log(data);
-        return fetch("http://localhost:3001/api/courses");
-      })
-      .then((response) => response.json())
-      .then((data) => setCourses(data))
-      .catch((error) => {
-        console.error("Fehler:", error);
-      });
+  const remove = async (id: Number) => {
+    if (!confirm("want to delete?")) return;
+
+    setIsLoading(true);
+
+    try {
+      await deleteCourse(id);
+      setCourses(courses.filter((course) => course.id !== id));
+    } catch (error) {
+      console.error("Failed to delete: ", error);
+      alert("Failed to delete!");
+    }
+
+    setIsLoading(false);
   };
 
   return (
@@ -97,34 +112,51 @@ const Home: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonTitle>langlearn</IonTitle>
-          <input ref={createNameRef} type="text" placeholder="Kursname" />
           <input
+            disabled={isLoading}
+            ref={createNameRef}
+            type="text"
+            placeholder="Kursname"
+          />
+          <input
+            disabled={isLoading}
             ref={createDescriptionRef}
             type="text"
             placeholder="Beschreibung"
           />
-          <button onClick={createCourse}>Kurs erstellen</button>
+          <button disabled={isLoading} onClick={create}>
+            Kurs erstellen
+          </button>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
-        <ExploreContainer />
         {courses.map((course, index) => (
           <IonCard key={index}>
             <IonCardHeader>
               <IonCardTitle>
-                ({course.ID}) {course.name}
+                ({course.id.toString()}) {course.name}
               </IonCardTitle>
               <IonCardSubtitle>{course.description}</IonCardSubtitle>
-              <button onClick={() => deleteCourse(course.ID)}>Löschen</button>
+              <button disabled={isLoading} onClick={() => remove(course.id)}>
+                Löschen
+              </button>
             </IonCardHeader>
             <IonCardContent>
-              <input ref={updateNameRef} type="text" placeholder="Kursname" />
               <input
-                ref={updateDescriptionRef}
+                disabled={isLoading}
+                id={`edited-course-name-${course.id}`}
+                type="text"
+                placeholder="Kursname"
+              />
+              <input
+                disabled={isLoading}
+                id={`edited-course-description-${course.id}`}
                 type="text"
                 placeholder="Beschreibung"
               />
-              <button onClick={updateCourse}>Kurs aktulaiseren</button>
+              <button disabled={isLoading} onClick={() => update(course.id)}>
+                Kurs aktialisieren
+              </button>
             </IonCardContent>
           </IonCard>
         ))}

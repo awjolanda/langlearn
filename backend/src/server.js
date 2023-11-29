@@ -25,8 +25,11 @@ db.connect((err) => {
 app.get("/api/courses", (req, res) => {
   let sql = "SELECT * FROM courses";
   db.query(sql, (err, results) => {
-    if (err) throw err;
-    res.send(results);
+    if (err) {
+      console.error(err);
+      res.status(500).send("Es gab ein Problem beim Bearbeiten Ihrer Abfrage.");
+    }
+    res.status(200).send(results);
   });
 });
 
@@ -35,31 +38,42 @@ app.get("/api/courses/:id", (req, res) => {
   let sql = "SELECT * FROM courses WHERE id = ?";
   db.query(sql, [req.params.id], (err, results) => {
     if (err) {
-      console.err(err);
+      console.error(err);
       res.status(500).send("Es gab ein Problem beim Bearbeiten Ihrer Abfrage.");
-    } else {
-      res.status(201).send("Der Kurs wurde erfolgerich erstellt.");
-    };
-    res.send(results);
+    }
+    res.status(200).send(results);
   });
 });
 
-// Methode zum Erstellen eines Kurses. (POST)
 app.post("/api/courses", (req, res) => {
   let data = req.body;
   let sql = "INSERT INTO courses SET ?";
 
   db.query(sql, data, (err, result) => {
     if (err) {
-      console.err(err);
+      console.error(err);
       res.status(500).send("Es gab ein Problem beim Bearbeiten Ihrer Abfrage.");
     } else {
-      res.status(201).send("Die Daten wurden erfolgreich hinzugefügt.");
-    };
+      let insertedId = result.insertId;
+      db.query(
+        "SELECT * FROM courses WHERE id = ?",
+        insertedId,
+        (err, rows) => {
+          if (err) {
+            console.error(err);
+            res
+              .status(500)
+              .send("Es gab ein Problem beim Abrufen des eingefügten Kurses.");
+          } else {
+            res.status(201).send(rows[0]);
+          }
+        }
+      );
+    }
   });
 });
 
-// ZU TUN: PUT-Methode zum Aktulisieren von Datensätzen in der Datenbank. DELETE-Methode zum Löschen von Datensätzen in der Datenbank.
+// TODO: PUT-Methode zum Aktulisieren von Datensätzen in der Datenbank. DELETE-Methode zum Löschen von Datensätzen in der Datenbank.
 
 // Methode zum Aktualisieren eines Kurses. (PUT)
 app.put("/api/courses/:id", (req, res) => {
@@ -67,10 +81,22 @@ app.put("/api/courses/:id", (req, res) => {
   let sql = "UPDATE courses SET ? WHERE id = ?";
 
   db.query(sql, [data, req.params.id], (err, result) => {
-    if (err) throw err;
-    res.send(
-      `Der Kurs mit der ID ${req.params.id} wurde erfolgreich aktualisiert.`
-    );
+    if (err) {
+      console.error(err);
+      res.status(500).send("Es gab ein Problem beim Bearbeiten Ihrer Abfrage.");
+    } else {
+      let id = req.params.id;
+      db.query("SELECT * FROM courses WHERE id = ?", id, (err, rows) => {
+        if (err) {
+          console.error(err);
+          res
+            .status(500)
+            .send("Es gab ein Problem beim Abrufen des aktualisierten Kurses.");
+        } else {
+          res.status(201).send(rows[0]);
+        }
+      });
+    }
   });
 });
 
@@ -79,10 +105,13 @@ app.delete("/api/courses/:id", (req, res) => {
   let sql = "DELETE FROM courses WHERE id = ?";
 
   db.query(sql, [req.params.id], (err, result) => {
-    if (err) throw err;
-    res.send(
-      `Der Kurs mit der ID ${req.params.id} wurde erfolgreich gelöscht!`
-    );
+    if (err) {
+      console.error(err);
+      res.status(500).send("Es gab ein Problem beim Bearbeiten Ihrer Abfrage.");
+    }
+    res
+      .status(200)
+      .send(`Der Kurs mit der ID ${req.params.id} wurde erfolgreich gelöscht!`);
   });
 });
 
